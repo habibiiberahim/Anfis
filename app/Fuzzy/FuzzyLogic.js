@@ -6,6 +6,7 @@ const math = require('mathjs')
 class FuzzyLogic {
 
     constructor () {
+        this.p0 = 0 
         this.layer4 = []
         this.layer5 = []  
         this.data = DataTraining.data
@@ -28,8 +29,9 @@ class FuzzyLogic {
         this.result_b = 0
         this.result_c = 0
         this.result_d = 0
-        this.err = 0.00000001
+        this.err = 0.001
         this.p = 0
+        this.prediction = 0
     }
 
     getOriginalData() {
@@ -46,45 +48,8 @@ class FuzzyLogic {
                 x1: a,
                 x2: b
             })
-            // miuData Manual
-            // this.miuData = [
-            //     {
-            //         id: 1,
-            //         x1: 0.0155,
-            //         x2: 0.7665
-            //     },
-            //     {
-            //         id: 2,
-            //         x1: 0.1441,
-            //         x2: 0.3849
-            //     },
-            //     {
-            //         id: 3,
-            //         x1: 0.0424,
-            //         x2: 0.5613
-            //     },
-            //     {
-            //         id: 4,
-            //         x1: 0.2530,
-            //         x2: 0.2470
-            //     },
-            //     {
-            //         id: 5,
-            //         x1: 0.1881,
-            //         x2: 0.3207
-            //     },
-            //     {
-            //         id: 6,
-            //         x1: 0.0156,
-            //         x2: 0.7656
-            //     },
-            // ]
         })
         this.calculateSum()
-        // console.log("miu: ", this.miuData)
-        // console.log("total miu x1: ", this.resultA)
-        // console.log("total miu x2: ", this.resultB)
-
     }
 
     calculateSum(){
@@ -114,11 +79,8 @@ class FuzzyLogic {
                 x1m2: b,
                 x2m1: c,
                 x2m2: d    
-            })
-            
+            })  
         })
-        // console.log("Data perkalian",this.newData)
-
         this.centerData.push({
             x11: this.result_a/this.resultA,
             x12: this.result_b/this.resultA,
@@ -145,8 +107,6 @@ class FuzzyLogic {
             L2LT: y/z
             })
         })
-        // console.log(this.DataL)
-       
     }
 
     updateMiu(){
@@ -156,19 +116,18 @@ class FuzzyLogic {
                 id: item.id,
                 x1: Math.pow(this.DataL[item.id-1].L1LT,2),
                 x2: Math.pow(this.DataL[item.id-1].L2LT,2)
-            })
-            
+            })  
         })
         this.calculateSum()
-        
     }
 
-    getObjektif(){
+    calculateObjektif(){
         this.DataLH = []
-        this.DataL.forEach(item => {
-            let x = item.L1 *  this.data[item.id-1].x1
-            let y = item.L2 *  this.data[item.id-1].x2
+        this.DataL.forEach(item => {     
+            let x = item.L1 *  this.miuData[item.id-1].x1
+            let y = item.L2 *  this.miuData[item.id-1].x2
             let z = (x + y)
+         
             this.p+=z 
 
             this.DataLH.push({
@@ -179,10 +138,13 @@ class FuzzyLogic {
              
             })
         })
-
-        if(Math.abs(this.p) < this.err){
+        let temp = Math.abs(this.p-this.p0)
+        
+        if(Math.abs(temp) < this.err){
             return true
         }else{
+            this.p0 = temp
+            this.p = 0
             return false
         }
         
@@ -205,14 +167,12 @@ class FuzzyLogic {
         let countC1 = 0
         let countC2 = 0 
         
-        
         console.log('DataL: ', this.DataL)
         this.DataL.forEach(item => {
             if(item.L2LT < item.L1LT){
                 countC1++
                 a += this.data[item.id-1].x1 
                 c += this.data[item.id-1].x2
-
             }else{
                 countC2++
                 b += this.data[item.id-1].x1 
@@ -273,18 +233,9 @@ class FuzzyLogic {
             a21: a21, 
             a22: a22
         })  
-        
-        // Data Deviasi
-        // this.deviasi.push({
-        //     a11: 14949,
-        //     a12: 9503.351,
-        //     a21: 27500, 
-        //     a22: 28857.064
-        // })  
-
-        console.log("Nilai Deviasi: \n",this.deviasi)
-        console.log("Total Cluster 1: ",countC1)
-        console.log("Total Cluster 2: ",countC2)
+        // console.log("Nilai Deviasi: \n",this.deviasi)
+        // console.log("Total Cluster 1: ",countC1)
+        // console.log("Total Cluster 2: ",countC2)
     }
 
     firstLayer(){
@@ -380,12 +331,6 @@ class FuzzyLogic {
       
 
         this.data.forEach(item =>{
-            // console.log("W: ", this.weightNew[0].w1)
-            // console.log("X1: ", item.x1)
-            // console.log("X2: ", item.x2)
-            
-            // let w1y1 = this.weightNew[0].w1 * ((47.673*item.x1)+(-24.865*item.x2)+(971073.515))
-            // let w2y2 = this.weightNew[0].w2 * (-1.563*item.x1)+(1.345*item.x2)+(-5965.87)
             let w1y1 = this.weightNew[0].w1 * ((this.resultsX[0]*item.x1)+(this.resultsX[1]*item.x2)+(this.resultsX[2]))
             let w2y2 = this.weightNew[0].w2 * ((this.resultsX[3]*item.x1)+(this.resultsX[4]*item.x2)+(this.resultsX[5]))
     
@@ -406,8 +351,11 @@ class FuzzyLogic {
         })
 
         const arrSum = arr => arr.reduce((a,b) => a + b, 0)/this.layer4.length
-        console.log("Predeksi: ", arrSum(this.layer5))
-
+        return this.prediction = arrSum(this.layer5)
+        
+    }
+    getPrediction(){
+        return this.prediction 
     }
 
     checkError(){

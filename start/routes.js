@@ -16,5 +16,5 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.on('/').render('welcome')
-Route.get('/index', 'DashboardController.index')
+Route.get('/', 'DashboardController.table')
+

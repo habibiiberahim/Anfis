@@ -1,0 +1,39 @@
+@layout('layouts.dashboard')
+@section('content')
+<div class="row" id="pendidikan">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">Data Penggunaan Bahan Bakar</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class=" text-primary text-center">
+                            <th>No</th>
+                            <th>Tahun</th>
+                            <th>Konsumsi Bahan Bakar Sebelumnya</th>
+                            <th>Jumlah Penduduk</th>
+                            <th>Konsumsi Bahan Bakar Sekarang</th>
+                        </thead>
+                        <tbody>
+                            @each(item in data)
+                                <tr class="text-center">
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.tahun }}</td>
+                                    <td>{{ item.x1 }}</td>
+                                    <td>{{ item.x2 }}</td>
+                                    <td>{{ item.target }}</td>
+                                </tr>
+                            @endeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-header card-header-primary">
+                <h4 class="card-title">Prediksi Penggunaan Bahan Bakar Akan Datang : {{ prediction }}</h4>
+        </div>
+    </div>
+</div>
+@endsection

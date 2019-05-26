@@ -8,23 +8,32 @@ class DashboardController {
         this.fuzzy = new Fuzzy
     }
 
-    async index () {
+    table({request, response, view}){
+        const data = this.fuzzy.getOriginalData() 
+        this.index() 
+        const prediction = this.fuzzy.getPrediction()
+         console.log("prediksi: ", prediction)  
+        return view.render('dashboard.index',{
+            data, prediction
+        })
+    }
+
+    index () {
+        console.log("Jalan")
         let iterasi = 0
-        let i = 100
+        let i = 10
         this.fuzzy.createMatrixU()
         for (let index = 0; index < i; index++) {
-            iterasi++
+            
             this.fuzzy.multiplyMatrix()
             this.fuzzy.createMembership()
-            if( this.fuzzy.getObjektif()){
+            
+            if( this.fuzzy.calculateObjektif()){
                 break    
             }else{
                 this.fuzzy.updateMiu()
-            }
-            
+            }      
         }
-        console.log("Total iterasi: "+iterasi)
-
         this.fuzzy.calculateMean()
         this.fuzzy.calculateDeviasi() 
         
@@ -32,9 +41,7 @@ class DashboardController {
         this.fuzzy.secondLayer() 
         this.fuzzy.thirdLayer()
         this.fuzzy.fourthLayer()
-        this.fuzzy.fifthLayer() 
-       
-        
+        this.fuzzy.fifthLayer()    
     }
 }
 
